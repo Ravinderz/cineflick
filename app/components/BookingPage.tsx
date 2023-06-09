@@ -1,10 +1,15 @@
 'use client'
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 const BookingPage = () => {
     let arr: string[] = [];
     let [selected, setSelected] = useState(arr);
+    let [booked, setBooked] = useState(["A2",'B3','B4','B5']);
+
+    useEffect(() => {
+        setBooked([...booked,'A3','A4']);
+    },[])
 
     const alphabets = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'];
 
@@ -19,20 +24,40 @@ const BookingPage = () => {
         }
     };
 
+    const isBooked = (seat: string): boolean => {
+        return booked.includes(seat);
+    }
+
+    const selectedSeat = (seat: string): boolean => {
+        return !isBooked(seat) && selected.includes(seat);
+    }
+
     const selectSeat = (e: any) => {
 
         let rowId = e.target.parentNode.getAttribute("row-id");
         let seatId = e.target.getAttribute("seat-id");
+        let seat = (rowId + seatId);
+        if(isBooked(seat)){
+            return;
+        }
         if (selected.length > 0) {
-            setSelected((selected: any) => [...selected, (rowId + seatId)]);
+            let index = selected.findIndex(elm => elm === (rowId+seatId));
+            if(index !== -1){
+                let arr = selected;
+                arr.splice(index,1);
+                setSelected((arr: any) => [...arr]);
+            }else{
+                    setSelected((selected: any) => [...selected, (rowId + seatId)]);
+            }
         } else {
-            setSelected(selected => [(rowId + seatId)]);
+                setSelected([(rowId + seatId)]);
         }
 
         console.log(rowId + seatId);
     }
 
     const renderSeatLayout = () => {
+
         let layout = [];
         let cols = obj.layout.cols.split("#");
         for (let i = 0; i < obj.layout.rows; i++) {
@@ -45,10 +70,11 @@ const BookingPage = () => {
                         </div>)
                 }
                 seatCol.push(<span key={alphabets[i] + j + 1} seat-id={j + 1} onClick={(event) => selectSeat(event)}
-                    aria-selected={selected.includes(alphabets[i] + (j + 1))}
-                    className={"cursor-pointer text-[10px] text-center leading-6 align-middle text-green-500  border border-green-400 rounded-sm w-[25px] h-[25px] mx-1 "
-                        + (selected.includes(alphabets[i] + (j + 1)) ? 'active-seat text-white' : '') +
-                        " hover:bg-green-500 hover:text-white"}>
+                    className={`cursor-pointer text-[10px] text-center leading-6 align-middle text-green-500
+                      border border-green-400 rounded-sm w-[25px] h-[25px] mx-1
+                    ${isBooked(alphabets[i] + (j + 1)) ? ' booked-seat text-slate-400 ' : ' hover:bg-green-500 hover:text-white '}    
+                    ${selectedSeat(alphabets[i] + (j + 1)) ? ' active-seat text-white ' : ''}
+                    `}>
                     {(j + 1)}
                 </span>)
             }

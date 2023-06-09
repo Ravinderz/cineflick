@@ -2,11 +2,17 @@
 @tailwind components;
 @tailwind utilities;
 
-html,body, :root {
+html,
+body,
+:root {
   height: 100%;
-  width: 100%
+  width: 100%;
 }
 
-.active-seat{
-  background-color:rgb(34 197 94 / 1);
+.active-seat {
+  background-color: rgb(34 197 94 / 1);
+}
+
+.booked-seat {
+  @apply bg-gray-300 border-gray-100 hover:bg-none hover:text-slate-400 cursor-default;
 }
