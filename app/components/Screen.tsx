@@ -10,6 +10,7 @@ const Screen = () => {
               pt-2
               text-slate-500
               cine-screen
+              translate-x-4
             `}>Screen</span>
           </div>
   )

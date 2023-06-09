@@ -27,7 +27,7 @@ const BookingPage = () => {
         "screenType": "Dolby Atmos",
         "layout": { // layout will have different sections, which can 
                     // have different layout for rows/columns
-            "rowsFormat": "2x1x2x1x2",
+            "rowsFormat": "4x1x6",
             "colsFormat": "3x2x8x2x2" //columns X no of columns as gaps X columns
                               // 10 columns 2 gaps 10 columns
         }

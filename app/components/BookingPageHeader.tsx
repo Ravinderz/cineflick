@@ -1,6 +1,6 @@
 'use client'
 
-const BookingPageHeader = ({ obj }) => {
+const BookingPageHeader = ({ obj } :any) => {
   return (
     //
     <div
