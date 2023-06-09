@@ -1,14 +1,20 @@
 'use client'
 
 import { useEffect, useState } from "react";
+import SeatItem from "./SeatItem";
 
 const BookingPage = () => {
     let arr: string[] = [];
     let [selected, setSelected] = useState(arr);
     let [booked, setBooked] = useState(["A2",'B3','B4','B5']);
+    let [colLayout, setColLayout] = useState(arr);
+    let [rowLayout, setRowLayout] = useState(arr);
 
     useEffect(() => {
         setBooked([...booked,'A3','A4']);
+        generateColumnLayout();
+        generateRowLayout();
+        
     },[])
 
     const alphabets = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'];
@@ -17,12 +23,49 @@ const BookingPage = () => {
         "screenName": "Preston Prime",
         "screenNumber": "Audi 1",
         "screenType": "Dolby Atmos",
-        "layout": {
-            "rows": 15,
-            "seatsPerRow": 29,
-            "cols": "2#2#11#2#2"
+        "layout": { // layout will have different sections, which can 
+                    // have different layout for rows/columns
+            "rowsFormat": "2x1x2x1x2",
+            "colsFormat": "1x2x3x2x1" //columns X no of columns as gaps X columns
+                              // 10 columns 2 gaps 10 columns
         }
     };
+
+    const generateRowLayout = () => {
+      let rowArr = obj.layout.rowsFormat.split('x');
+      let rowLayout = [];
+      rowArr = [...rowArr];
+      for(let j = 0; j < rowArr.length; j++){
+        let value:any = rowArr[j];
+        for(let i = 0; i < value; i++){
+          if(j % 2 === 0){
+            rowLayout.push('main');
+          }else{
+            rowLayout.push('gap');
+          }
+        }
+      }
+
+      setRowLayout([...rowLayout]);
+    }
+
+    const generateColumnLayout = () => {
+      let colArr = obj.layout.colsFormat.split('x');
+      let colLayout = [];
+      colArr = [...colArr];
+      for(let j = 0; j < colArr.length; j++){
+        let value:any = colArr[j];
+        for(let i = 0; i < value; i++){
+          if(j % 2 === 0){
+            colLayout.push('main');
+          }else{
+            colLayout.push('gap');
+          }
+        }
+      }
+
+      setColLayout([...colLayout]);
+    }
 
     const isBooked = (seat: string): boolean => {
         return booked.includes(seat);
@@ -33,76 +76,118 @@ const BookingPage = () => {
     }
 
     const selectSeat = (e: any) => {
-
-        let rowId = e.target.parentNode.getAttribute("row-id");
-        let seatId = e.target.getAttribute("seat-id");
-        let seat = (rowId + seatId);
-        if(isBooked(seat)){
-            return;
-        }
-        if (selected.length > 0) {
-            let index = selected.findIndex(elm => elm === (rowId+seatId));
-            if(index !== -1){
-                let arr = selected;
-                arr.splice(index,1);
-                setSelected((arr: any) => [...arr]);
-            }else{
-                    setSelected((selected: any) => [...selected, (rowId + seatId)]);
-            }
+      let rowId = e.target.parentNode.getAttribute("row-id");
+      let seatId = e.target.getAttribute("seat-id");
+      let seat = rowId + seatId;
+      if (isBooked(seat)) {
+        return;
+      }
+      if (selected.length > 0) {
+        let index = selected.findIndex((elm) => elm === rowId + seatId);
+        if (index !== -1) {
+          let arr = selected;
+          arr.splice(index, 1);
+          setSelected((arr: any) => [...arr]);
         } else {
-                setSelected([(rowId + seatId)]);
+          setSelected((selected: any) => [...selected, rowId + seatId]);
         }
+      } else {
+        setSelected([rowId + seatId]);
+      }
 
-        console.log(rowId + seatId);
+      console.log(rowId + seatId);
     }
 
     const renderSeatLayout = () => {
-
-        let layout = [];
-        let cols = obj.layout.cols.split("#");
-        for (let i = 0; i < obj.layout.rows; i++) {
-            let seatCol = [];
-            for (let j = 0; j < obj.layout.seatsPerRow; j++) {
-                if (j === 0) {
-                    seatCol.push(
-                        <div key={alphabets[i]} className="mx-4  w-4">
-                            <span seat-id={j + 1} className="font-medium">{alphabets[i]}</span>
-                        </div>)
-                }
-                seatCol.push(<span key={alphabets[i] + j + 1} seat-id={j + 1} onClick={(event) => selectSeat(event)}
-                    className={`cursor-pointer text-[10px] text-center leading-6 align-middle text-green-500
-                      border border-green-400 rounded-sm w-[25px] h-[25px] mx-1
-                    ${isBooked(alphabets[i] + (j + 1)) ? ' booked-seat text-slate-400 ' : ' hover:bg-green-500 hover:text-white '}    
-                    ${selectedSeat(alphabets[i] + (j + 1)) ? ' active-seat text-white ' : ''}
-                    `}>
-                    {(j + 1)}
-                </span>)
-            }
-            layout.push(<div key={alphabets[i]} row-id={alphabets[i]} className="flex my-2">
-                {seatCol}
-            </div>);
+      let layout = [];
+      let rowMainCount = 0;
+      let rowGapCount = 0;
+      for (let i = 0; i < rowLayout.length; i++) {
+        let seatCol = [];
+        let mainCount = 0;
+        let gapCount = 0;
+        if(rowLayout[i] === 'main'){
+        for (let j = 0; j < colLayout.length; j++) {
+          if (j === 0) {
+            seatCol.push(
+              <SeatItem
+                key={"letter " + alphabets[rowMainCount] + (j + 1)}
+                type={"letter"}
+                seatId={"letter " + alphabets[rowMainCount] + (j + 1)}
+                value={alphabets[rowMainCount]}
+                index={j}
+              />
+            );
+          }
+          if(colLayout[j] === 'main'){
+            seatCol.push(
+              <SeatItem
+                key={"main "+ alphabets[rowMainCount] + (mainCount + 1)}
+                type={"main"}
+                seatId={alphabets[rowMainCount] + (mainCount + 1)}
+                index={mainCount}
+                selectSeat={selectSeat}
+                isBooked={isBooked}
+                selectedSeat={selectedSeat}
+              />
+            );
+            mainCount++;
+          }else if(colLayout[j] === 'gap'){
+            seatCol.push(
+            <SeatItem
+                key={"gap " + alphabets[rowMainCount] + (gapCount + 1)}
+                type={"gap"}
+                seatId={alphabets[rowMainCount] + (gapCount + 1)}
+                index={gapCount}
+              />
+            );
+            gapCount++;
+          }
         }
-        return layout;
+          layout.push(
+            <div key={"rowMain "+alphabets[rowMainCount]} row-id={alphabets[rowMainCount]} className="flex my-2">
+              {seatCol}
+            </div>
+          );
+          rowMainCount++;
+        }
+        else if(rowLayout[i] === 'gap'){
+          seatCol.push(
+            <SeatItem
+                key={"gap " + alphabets[rowGapCount] + (gapCount + 1)}
+                type={"gap"}
+                seatId={alphabets[rowGapCount] + (gapCount + 1)}
+                index={gapCount}
+              />
+            );
+            layout.push(
+              <div key={"rowGap "+alphabets[rowGapCount]} row-id={alphabets[i]} className="flex my-2">
+                {seatCol}
+              </div>
+            );
+            rowGapCount++;
+        }
+        
+      }
+      return layout;
     }
 
     return (
-        <div>
-            <div id="cine-screen" className="bg-violet-400 flex justify-evenly">
-                <span>{obj.screenName}</span>
-                <span>{obj.screenNumber}({obj.screenType})</span>
-            </div>
-            <div className="text-center">
-                <span className="text-lg">
-                    SCREEN
-                </span>
-            </div>
-            <div className="bg-slate-100 py-12 flex justify-center">
-                <div>
-                    {renderSeatLayout()}
-                </div>
-            </div>
+      <div>
+        <div id="cine-screen" className="bg-violet-400 flex justify-evenly">
+          <span>{obj.screenName}</span>
+          <span>
+            {obj.screenNumber}({obj.screenType})
+          </span>
         </div>
-    )
+        <div className="text-center">
+          <span className="text-lg">SCREEN</span>
+        </div>
+        <div className="bg-slate-50 py-12 flex justify-center">
+          <div>{renderSeatLayout()}</div>
+        </div>
+      </div>
+    );
 }
 
 export default BookingPage
