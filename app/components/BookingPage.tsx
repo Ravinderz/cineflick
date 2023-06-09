@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from "react";
 import SeatItem from "./SeatItem";
+import Screen from "./Screen";
+import BookingPageHeader from "./BookingPageHeader";
 
 const BookingPage = () => {
     let arr: string[] = [];
@@ -20,13 +22,13 @@ const BookingPage = () => {
     const alphabets = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'];
 
     const obj = {
-        "screenName": "Preston Prime",
+        "screenName": "PVR Preston Prime",
         "screenNumber": "Audi 1",
         "screenType": "Dolby Atmos",
         "layout": { // layout will have different sections, which can 
                     // have different layout for rows/columns
             "rowsFormat": "2x1x2x1x2",
-            "colsFormat": "1x2x3x2x1" //columns X no of columns as gaps X columns
+            "colsFormat": "3x2x8x2x2" //columns X no of columns as gaps X columns
                               // 10 columns 2 gaps 10 columns
         }
     };
@@ -96,7 +98,7 @@ const BookingPage = () => {
       }
 
       console.log(rowId + seatId);
-    }
+    };
 
     const renderSeatLayout = () => {
       let layout = [];
@@ -174,17 +176,10 @@ const BookingPage = () => {
 
     return (
       <div>
-        <div id="cine-screen" className="bg-violet-400 flex justify-evenly">
-          <span>{obj.screenName}</span>
-          <span>
-            {obj.screenNumber}({obj.screenType})
-          </span>
-        </div>
-        <div className="text-center">
-          <span className="text-lg">SCREEN</span>
-        </div>
-        <div className="bg-slate-50 py-12 flex justify-center">
-          <div>{renderSeatLayout()}</div>
+        <BookingPageHeader obj={obj} />
+        <div className="bg-slate-50 py-12 grid">
+          <Screen />
+          <div className="justify-self-center">{renderSeatLayout()}</div>
         </div>
       </div>
     );

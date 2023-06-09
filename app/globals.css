@@ -16,3 +16,15 @@ body,
 .booked-seat {
   @apply bg-gray-300 border-gray-100 hover:bg-none hover:text-slate-400 cursor-default;
 }
+
+.cine-screen{
+  border-top: 50px solid #e2e8f0;
+  border-left: 10px solid transparent;
+  border-right: 10px solid transparent;
+  height: 0;
+  width:220px;
+}
+
+.box-shadow-custom {
+  box-shadow: 0px 10px 18px rgba(0,0,0,0.3);
+}
