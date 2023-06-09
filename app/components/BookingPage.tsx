@@ -1,6 +1,10 @@
 'use client'
 
+import { useState } from "react";
+
 const BookingPage = () => {
+    let arr: string[] = [];
+    let [selected, setSelected] = useState(arr);
 
     const alphabets = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'];
 
@@ -10,14 +14,21 @@ const BookingPage = () => {
         "screenType": "Dolby Atmos",
         "layout": {
             "rows": 15,
-            "seatsPerRow": 15,
+            "seatsPerRow": 29,
             "cols": "2#2#11#2#2"
         }
     };
 
     const selectSeat = (e: any) => {
+
         let rowId = e.target.parentNode.getAttribute("row-id");
         let seatId = e.target.getAttribute("seat-id");
+        if (selected.length > 0) {
+            setSelected((selected: any) => [...selected, (rowId + seatId)]);
+        } else {
+            setSelected(selected => [(rowId + seatId)]);
+        }
+
         console.log(rowId + seatId);
     }
 
@@ -33,7 +44,13 @@ const BookingPage = () => {
                             <span seat-id={j + 1} className="font-medium">{alphabets[i]}</span>
                         </div>)
                 }
-                seatCol.push(<span key={alphabets[i] + j + 1} seat-id={j + 1} onClick={(event) => selectSeat(event)} className="cursor-pointer text-xs border border-green-400 rounded-sm py-1 px-2 mx-1 hover:bg-green-500 active:bg-green-600"></span>)
+                seatCol.push(<span key={alphabets[i] + j + 1} seat-id={j + 1} onClick={(event) => selectSeat(event)}
+                    aria-selected={selected.includes(alphabets[i] + (j + 1))}
+                    className={"cursor-pointer text-[10px] text-center leading-6 align-middle text-green-500  border border-green-400 rounded-sm w-[25px] h-[25px] mx-1 "
+                        + (selected.includes(alphabets[i] + (j + 1)) ? 'active-seat text-white' : '') +
+                        " hover:bg-green-500 hover:text-white"}>
+                    {(j + 1)}
+                </span>)
             }
             layout.push(<div key={alphabets[i]} row-id={alphabets[i]} className="flex my-2">
                 {seatCol}

@@ -6,3 +6,7 @@ html,body, :root {
   height: 100%;
   width: 100%
 }
+
+.active-seat{
+  background-color:rgb(34 197 94 / 1);
+}
