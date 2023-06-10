@@ -225,9 +225,9 @@ const BookingPage = () => {
         <BookingPageHeader obj={obj} />
         <div className={`flex`}>
           <Sidebar setLayoutData={setLayoutFormData} />
-          <div className="bg-slate-50 py-12 grid w-full">
+          <div className="bg-slate-50 py-12 grid w-full overflow-x-scroll">
             <Screen />
-            <div className="justify-self-center">
+            <div className="justify-self-center px-8">
               {
                 renderSeatLayout()
               }

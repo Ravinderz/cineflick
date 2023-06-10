@@ -29,7 +29,7 @@ const SeatItem:React.FC<seatItemProps> = ({type,seatId,index,selectSeat,isBooked
       {index + 1}
     </span>
   ) : type && type === "gap" ? (
-    <span seat-id={index + 1} type-id="gap" className="rounded-sm w-[25px] h-[25px]"></span>
+    <span seat-id={index + 1} type-id="gap" className="rounded-sm w-[25px] h-[25px] mx-1"></span>
   ) : (
     <div className="mx-4 w-4 ">
       <span seat-id={index + 1} className={`
