@@ -6,14 +6,19 @@ import Screen from "./Screen";
 import BookingPageHeader from "./BookingPageHeader";
 import Sidebar from "./Sidebar";
 
+//rows X gaps X rows // we can add more rows and gaps seperated by x
+// cols x gaps x cols
+// for one special layout we can also use the below format
+// cols x gaps x (cols - no of rows that needs to be blank in this cols)
+// eg : 4x2x(4-2) this would render, 4 cols, 2 gaps and 4 cols with first two rows being empty  
+// eg : 4-2:5x1x6x1x4 this 4-2:5 this format will render empty seats
+// from 2nd row till 5th row and then show normal bookable seats
+
 interface LayoutData {
   sectionName?: string,
-  rowsFormat?: string, //rows X gaps X rows // we can add more rows and gaps seperated by x
-  colsFormat?: string // cols x gaps x cols
-                      // for one special layout we can also use the below format
-                      // cols x gaps x (cols - no of rows that needs to be blank in this cols)
-                      // eg : 4x2x(4-2) this would render, 4 cols, 2 gaps and 4 cols with first two rows being empty  
-}
+  rowsFormat?: string, 
+  colsFormat?: string 
+                      }
 
 const BookingPage = () => {
     let arr: string[] = [];
@@ -75,16 +80,22 @@ const BookingPage = () => {
       let negativeArr = [];
       for (let j = 0; j < colArr.length; j++) {
         let count: any = colArr[j];
-        let gapRow = 0;
+        let gapRow;
         if (count.includes("-")) {
           count = count.replace("(", '').replace(")", '');
           negativeArr = count.split("-");
           count = negativeArr[0];
           gapRow = negativeArr[1];
+
         }
         for (let i = 0; i < count; i++) {
-          if (gapRow > 0) {
-            colLayout.push(`gap-${gapRow}`);
+          if (gapRow){
+            if(gapRow.includes(':') &&
+            (gapRow.split(':')[1] - gapRow.split(':')[0]) > 0) {
+              colLayout.push(`gap-${gapRow}`);
+            }else if(gapRow > 0){
+              colLayout.push(`gap-${gapRow}`);
+            }
           } else {
             if (j % 2 === 0) {
               colLayout.push("main");
@@ -97,6 +108,7 @@ const BookingPage = () => {
       }
 
       setColLayout([...colLayout]);
+      console.log(colLayout);
     }
 
     const isBooked = (seat: string): boolean => {
@@ -183,7 +195,18 @@ const BookingPage = () => {
               gapCount++;
             } else if (colLayout[j].includes("gap-")) {
               let val = colLayout[j].split("-")[1];
-              if (parseInt(val) > rowMainCount) {
+              if(val.includes(':')){
+                let splitVal = val.split(':');
+                if(parseInt(splitVal[0]) <= rowMainCount
+                 && parseInt(splitVal[1]) > rowMainCount){
+                  seatCol.push(getEmptySeatItem(rowMainCount, gapCount));
+                  gapCount++;
+                 } else {
+                  seatCol.push(getNormalSeatItem(rowMainCount, mainCount));
+                  mainCount++;
+                }
+              }
+              else if (parseInt(val) > rowMainCount) {
                 seatCol.push(getEmptySeatItem(rowMainCount, gapCount));
                 gapCount++;
               } else {
