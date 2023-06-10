@@ -4,6 +4,16 @@ import { useEffect, useState } from "react";
 import SeatItem from "./SeatItem";
 import Screen from "./Screen";
 import BookingPageHeader from "./BookingPageHeader";
+import Sidebar from "./Sidebar";
+
+interface LayoutData {
+  sectionName?: string,
+  rowsFormat?: string, //rows X gaps X rows // we can add more rows and gaps seperated by x
+  colsFormat?: string // cols x gaps x cols
+                      // for one special layout we can also use the below format
+                      // cols x gaps x (cols - no of rows that needs to be blank in this cols)
+                      // eg : 4x2x(4-2) this would render, 4 cols, 2 gaps and 4 cols with first two rows being empty  
+}
 
 const BookingPage = () => {
     let arr: string[] = [];
@@ -11,13 +21,14 @@ const BookingPage = () => {
     let [booked, setBooked] = useState(["A2",'B3','B4','B5']);
     let [colLayout, setColLayout] = useState(arr);
     let [rowLayout, setRowLayout] = useState(arr);
+    let [layoutData,setLayoutData] = useState<LayoutData>({});
 
     useEffect(() => {
         setBooked([...booked,'A3','A4']);
         generateColumnLayout();
         generateRowLayout();
-        
-    },[])
+        renderSeatLayout()
+    },[layoutData])
 
     const alphabets = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'];
 
@@ -25,16 +36,18 @@ const BookingPage = () => {
         "screenName": "PVR Preston Prime",
         "screenNumber": "Audi 1",
         "screenType": "Dolby Atmos",
-        "layout": { // layout will have different sections, which can 
-                    // have different layout for rows/columns
-            "rowsFormat": "4x1x6",
-            "colsFormat": "3x2x8x2x2" //columns X no of columns as gaps X columns
-                              // 10 columns 2 gaps 10 columns
-        }
     };
 
+    const setLayoutFormData = (data: any) => {
+      setLayoutData({...data})
+    }
+
+
     const generateRowLayout = () => {
-      let rowArr = obj.layout.rowsFormat.split('x');
+      if(!layoutData || !layoutData.rowsFormat){
+        return;
+      }
+      let rowArr = layoutData.rowsFormat.split('x');
       let rowLayout = [];
       rowArr = [...rowArr];
       for(let j = 0; j < rowArr.length; j++){
@@ -52,18 +65,35 @@ const BookingPage = () => {
     }
 
     const generateColumnLayout = () => {
-      let colArr = obj.layout.colsFormat.split('x');
+      if (!layoutData || !layoutData.colsFormat) {
+        return;
+      }
+      let colArr = layoutData.colsFormat.split("x");
       let colLayout = [];
       colArr = [...colArr];
-      for(let j = 0; j < colArr.length; j++){
-        let value:any = colArr[j];
-        for(let i = 0; i < value; i++){
-          if(j % 2 === 0){
-            colLayout.push('main');
-          }else{
-            colLayout.push('gap');
+      
+      let negativeArr = [];
+      for (let j = 0; j < colArr.length; j++) {
+        let count: any = colArr[j];
+        let gapRow = 0;
+        if (count.includes("-")) {
+          count = count.replace("(", '').replace(")", '');
+          negativeArr = count.split("-");
+          count = negativeArr[0];
+          gapRow = negativeArr[1];
+        }
+        for (let i = 0; i < count; i++) {
+          if (gapRow > 0) {
+            colLayout.push(`gap-${gapRow}`);
+          } else {
+            if (j % 2 === 0) {
+              colLayout.push("main");
+            } else {
+              colLayout.push("gap");
+            }
           }
         }
+        
       }
 
       setColLayout([...colLayout]);
@@ -75,6 +105,38 @@ const BookingPage = () => {
 
     const selectedSeat = (seat: string): boolean => {
         return !isBooked(seat) && selected.includes(seat);
+    }
+
+    const getNormalSeatItem = (rowMainCount: any,mainCount:any) => {
+      return <SeatItem
+      key={"main "+ alphabets[rowMainCount] + (mainCount + 1)}
+      type={"main"}
+      seatId={alphabets[rowMainCount] + (mainCount + 1)}
+      index={mainCount}
+      selectSeat={selectSeat}
+      isBooked={isBooked}
+      selectedSeat={selectedSeat}
+    />
+    }
+
+    const getAplhabetSeatItem = (rowMainCount:any,j:any) => {
+      return <SeatItem
+      key={"letter " + alphabets[rowMainCount] + (j + 1)}
+      type={"letter"}
+      seatId={"letter " + alphabets[rowMainCount] + (j + 1)}
+      value={alphabets[rowMainCount]}
+      index={j}
+    />
+    }
+
+    const getEmptySeatItem = (rowMainCount: any,gapCount:any) => {
+      
+      return <SeatItem
+                key={"gap " + alphabets[rowMainCount] + (gapCount + 1)}
+                type={"gap"}
+                seatId={alphabets[rowMainCount] + (gapCount + 1)}
+                index={gapCount}
+              />
     }
 
     const selectSeat = (e: any) => {
@@ -108,78 +170,69 @@ const BookingPage = () => {
         let seatCol = [];
         let mainCount = 0;
         let gapCount = 0;
-        if(rowLayout[i] === 'main'){
-        for (let j = 0; j < colLayout.length; j++) {
-          if (j === 0) {
-            seatCol.push(
-              <SeatItem
-                key={"letter " + alphabets[rowMainCount] + (j + 1)}
-                type={"letter"}
-                seatId={"letter " + alphabets[rowMainCount] + (j + 1)}
-                value={alphabets[rowMainCount]}
-                index={j}
-              />
-            );
+        if (rowLayout[i] === "main") {
+          for (let j = 0; j < colLayout.length; j++) {
+            if (j === 0) {
+              seatCol.push(getAplhabetSeatItem(rowMainCount, j));
+            }
+            if (colLayout[j] === "main") {
+              seatCol.push(getNormalSeatItem(rowMainCount, mainCount));
+              mainCount++;
+            } else if (colLayout[j] === "gap") {
+              seatCol.push(getEmptySeatItem(rowMainCount, gapCount));
+              gapCount++;
+            } else if (colLayout[j].includes("gap-")) {
+              let val = colLayout[j].split("-")[1];
+              if (parseInt(val) > rowMainCount) {
+                seatCol.push(getEmptySeatItem(rowMainCount, gapCount));
+                gapCount++;
+              } else {
+                seatCol.push(getNormalSeatItem(rowMainCount, mainCount));
+                mainCount++;
+              }
+            }
           }
-          if(colLayout[j] === 'main'){
-            seatCol.push(
-              <SeatItem
-                key={"main "+ alphabets[rowMainCount] + (mainCount + 1)}
-                type={"main"}
-                seatId={alphabets[rowMainCount] + (mainCount + 1)}
-                index={mainCount}
-                selectSeat={selectSeat}
-                isBooked={isBooked}
-                selectedSeat={selectedSeat}
-              />
-            );
-            mainCount++;
-          }else if(colLayout[j] === 'gap'){
-            seatCol.push(
-            <SeatItem
-                key={"gap " + alphabets[rowMainCount] + (gapCount + 1)}
-                type={"gap"}
-                seatId={alphabets[rowMainCount] + (gapCount + 1)}
-                index={gapCount}
-              />
-            );
-            gapCount++;
-          }
-        }
           layout.push(
-            <div key={"rowMain "+alphabets[rowMainCount]} row-id={alphabets[rowMainCount]} className="flex my-2">
+            <div
+              key={"rowMain " + alphabets[rowMainCount]}
+              row-id={alphabets[rowMainCount]}
+              className="flex my-2"
+            >
               {seatCol}
             </div>
           );
           rowMainCount++;
+        } else if (rowLayout[i] === "gap") {
+          seatCol.push(getEmptySeatItem(rowGapCount, gapCount));
+          layout.push(
+            <div
+              key={"rowGap " + alphabets[rowGapCount]}
+              row-id={alphabets[i]}
+              className="flex my-2"
+            >
+              {seatCol}
+            </div>
+          );
+          rowGapCount++;
         }
-        else if(rowLayout[i] === 'gap'){
-          seatCol.push(
-            <SeatItem
-                key={"gap " + alphabets[rowGapCount] + (gapCount + 1)}
-                type={"gap"}
-                seatId={alphabets[rowGapCount] + (gapCount + 1)}
-                index={gapCount}
-              />
-            );
-            layout.push(
-              <div key={"rowGap "+alphabets[rowGapCount]} row-id={alphabets[i]} className="flex my-2">
-                {seatCol}
-              </div>
-            );
-            rowGapCount++;
-        }
-        
       }
       return layout;
+
     }
 
     return (
       <div>
         <BookingPageHeader obj={obj} />
-        <div className="bg-slate-50 py-12 grid">
-          <Screen />
-          <div className="justify-self-center">{renderSeatLayout()}</div>
+        <div className={`flex`}>
+          <Sidebar setLayoutData={setLayoutFormData} />
+          <div className="bg-slate-50 py-12 grid w-full">
+            <Screen />
+            <div className="justify-self-center">
+              {
+                renderSeatLayout()
+              }
+            </div>
+          </div>
         </div>
       </div>
     );
