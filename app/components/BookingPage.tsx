@@ -14,8 +14,9 @@ import Sidebar from "./Sidebar";
 // eg : 4-2:5x1x6x1x4 this 4-2:5 this format will render empty seats
 // from 2nd row till 5th row and then show normal bookable seats
 
-interface LayoutData {
-  sectionName?: string,
+//TODO :: should be able to render normal seat along with missing seats in a particular row after gap
+
+export interface LayoutData {
   rowsFormat?: string, 
   colsFormat?: string 
                       }
@@ -108,7 +109,6 @@ const BookingPage = () => {
       }
 
       setColLayout([...colLayout]);
-      console.log(colLayout);
     }
 
     const isBooked = (seat: string): boolean => {
