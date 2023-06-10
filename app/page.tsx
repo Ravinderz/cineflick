@@ -3,7 +3,7 @@ import BookingPage from "./components/BookingPage";
 export default function Home() {
   return (
 
-    <div>
+    <div className={`h-full`}>
       <BookingPage />
     </div>
 

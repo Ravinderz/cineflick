@@ -244,11 +244,13 @@ const BookingPage = () => {
     }
 
     return (
-      <div>
+      <div className={`h-full`}>
         <BookingPageHeader obj={obj} />
-        <div className={`flex`}>
+        <div className={`flex h-full`}>
           <Sidebar setLayoutData={setLayoutFormData} />
-          <div className="bg-slate-50 py-12 grid w-full overflow-x-scroll">
+          <div className={`bg-slate-50
+           py-12 grid w-full overflow-x-scroll
+           `}>
             <Screen />
             <div className="justify-self-center px-8">
               {

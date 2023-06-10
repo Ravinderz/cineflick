@@ -2,7 +2,7 @@
 
 const Screen = () => {
   return (
-    <div className="text-center mb-10 grid">
+    <div className="text-center grid">
             <span className={`
               justify-self-center
               text-xs
